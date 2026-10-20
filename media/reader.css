@@ -1,0 +1,401 @@
+/* novelRead 阅读器样式。颜色尽量走 VS Code 主题变量，只有阅读主题是硬编码的。 */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/*
+ * 关键：hidden 属性靠 UA 样式表的 `[hidden] { display: none }` 生效，
+ * 而作者样式表优先级高于 UA 样式表。下面 .shelf / .reader / .toc-overlay /
+ * .reader-tools 都设了 display:flex，会把 hidden 压掉、导致元素根本藏不住。
+ * 这条必须留着。
+ */
+[hidden] {
+  display: none !important;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family: var(--vscode-font-family);
+  font-size: var(--vscode-font-size);
+  color: var(--vscode-foreground);
+  background: var(--vscode-panel-background, var(--vscode-editor-background));
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.spacer {
+  flex: 1 1 auto;
+}
+
+.meta {
+  color: var(--vscode-descriptionForeground);
+  font-size: 0.85em;
+  white-space: nowrap;
+}
+
+/* ------------------------------------------------------------------ 工具栏 */
+
+.toolbar {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 32px;
+  padding: 4px 8px;
+  border-bottom: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.35));
+  overflow-x: auto;
+  scrollbar-width: thin;
+}
+
+.toolbar-title {
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 40%;
+}
+
+.reader-tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: 0 0 auto;
+}
+
+.tool-btn,
+.tool-select,
+.primary-btn {
+  font-family: inherit;
+  font-size: 0.9em;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tool-btn,
+.tool-select {
+  color: var(--vscode-foreground);
+  background: transparent;
+  border: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.35));
+  padding: 2px 8px;
+}
+
+.tool-select {
+  background: var(--vscode-dropdown-background, transparent);
+  color: var(--vscode-dropdown-foreground, var(--vscode-foreground));
+  border-color: var(--vscode-dropdown-border, var(--vscode-panel-border, rgba(128, 128, 128, 0.35)));
+}
+
+.tool-btn:hover {
+  background: var(--vscode-toolbar-hoverBackground, rgba(128, 128, 128, 0.2));
+}
+
+.tool-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+  background: transparent;
+}
+
+.tool-btn:focus-visible,
+.tool-select:focus-visible,
+.primary-btn:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: 1px;
+}
+
+.primary-btn {
+  color: var(--vscode-button-foreground);
+  background: var(--vscode-button-background);
+  border: 1px solid var(--vscode-button-background);
+  padding: 4px 12px;
+}
+
+.primary-btn:hover {
+  background: var(--vscode-button-hoverBackground);
+}
+
+/* ------------------------------------------------------------------ 布局 */
+
+.body {
+  flex: 1 1 auto;
+  display: flex;
+  min-height: 0;
+}
+
+.empty {
+  color: var(--vscode-descriptionForeground);
+  text-align: center;
+  line-height: 1.9;
+  padding: 24px 12px;
+  margin: 0;
+}
+
+/* ------------------------------------------------------------------ 书架 */
+
+.shelf {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  padding: 8px;
+}
+
+.shelf-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shelf-list {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.shelf-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.shelf-item:hover {
+  background: var(--vscode-list-hoverBackground);
+}
+
+.shelf-item:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: -1px;
+}
+
+.shelf-item-main {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.shelf-item-title {
+  display: block;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shelf-item-sub {
+  display: block;
+  color: var(--vscode-descriptionForeground);
+  font-size: 0.8em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.shelf-item-actions {
+  flex: 0 0 auto;
+  display: flex;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.1s ease-in-out;
+}
+
+.shelf-item:hover .shelf-item-actions,
+.shelf-item:focus-within .shelf-item-actions {
+  opacity: 1;
+}
+
+.shelf-item-actions button {
+  font-size: 0.85em;
+  padding: 1px 6px;
+}
+
+.shelf-progress {
+  flex: 0 0 auto;
+  width: 80px;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(128, 128, 128, 0.3);
+  overflow: hidden;
+}
+
+.shelf-progress > i {
+  display: block;
+  height: 100%;
+  background: var(--vscode-progressBar-background, #0e70c0);
+}
+
+/* ------------------------------------------------------------------ 正文 */
+
+.reader {
+  position: relative;
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.reader[data-theme='auto'] {
+  background: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+}
+
+.reader[data-theme='light'] {
+  background: #ffffff;
+  color: #24292f;
+}
+
+.reader[data-theme='sepia'] {
+  background: #f7edd9;
+  color: #4a3b28;
+}
+
+.reader[data-theme='dark'] {
+  background: #1f1f1f;
+  color: #d6d6d6;
+}
+
+/* 正文左右留白：窄面板时固定 20px，宽面板时把正文限制在 maxWidth 内居中。 */
+.reader {
+  --nr-side-padding: max(20px, calc((100% - var(--nr-max-width, 760px)) / 2));
+}
+
+.chapter-title {
+  flex: 0 0 auto;
+  margin: 10px 0 0;
+  padding: 0 var(--nr-side-padding);
+  font-size: calc(var(--nr-font-size, 16px) * 1.15);
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.chapter-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  outline: none;
+  padding: 8px var(--nr-side-padding) 32px;
+  font-family: var(--nr-font-family, var(--vscode-font-family));
+  font-size: var(--nr-font-size, 16px);
+  line-height: var(--nr-line-height, 1.8);
+  word-break: break-word;
+}
+
+.chapter-body > p {
+  margin: 0 0 0.9em;
+  text-indent: 2em;
+}
+
+/* ------------------------------------------------------------------ 目录 */
+
+.toc-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  background: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+  box-shadow: 0 0 0 1px var(--vscode-panel-border, rgba(128, 128, 128, 0.35));
+}
+
+.toc-head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--vscode-panel-border, rgba(128, 128, 128, 0.35));
+}
+
+.toc-filter {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-family: inherit;
+  font-size: 0.95em;
+  padding: 3px 8px;
+  color: var(--vscode-input-foreground);
+  background: var(--vscode-input-background);
+  border: 1px solid var(--vscode-input-border, transparent);
+  border-radius: 4px;
+  outline: none;
+}
+
+.toc-filter:focus {
+  border-color: var(--vscode-focusBorder);
+}
+
+.toc-list {
+  /* 作为 .toc-item 的 offsetParent，让 scrollTop 定位算得准 */
+  position: relative;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  margin: 0;
+  padding: 6px 8px 16px;
+  list-style: none;
+  /*
+   * 面板又宽又矮，多列比长条列表好用。
+   * 用 grid 而不是 CSS 多列（columns）：多列要做列平衡，再叠加每个条目的
+   * break-inside:avoid，几千章时打开目录会明显卡顿。grid 行优先、不需要平衡。
+   */
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  grid-auto-rows: min-content;
+  align-content: start;
+  gap: 1px 10px;
+}
+
+.toc-item {
+  padding: 3px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.toc-item:hover {
+  background: var(--vscode-list-hoverBackground);
+}
+
+.toc-item.is-current {
+  background: var(--vscode-list-activeSelectionBackground);
+  color: var(--vscode-list-activeSelectionForeground);
+}
+
+/* ------------------------------------------------------------------ Toast */
+
+.toast {
+  position: fixed;
+  right: 12px;
+  bottom: 12px;
+  max-width: 60%;
+  padding: 6px 12px;
+  border-radius: 4px;
+  font-size: 0.9em;
+  background: var(--vscode-notifications-background, #333333);
+  color: var(--vscode-notifications-foreground, #ffffff);
+  border: 1px solid var(--vscode-notifications-border, transparent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.toast[data-level='error'] {
+  border-color: var(--vscode-inputValidation-errorBorder, #be1100);
+}
+
+.toast[data-level='warn'] {
+  border-color: var(--vscode-inputValidation-warningBorder, #b89500);
+}

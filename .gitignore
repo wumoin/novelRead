@@ -1,0 +1,30 @@
+# 依赖
+node_modules/
+
+# 构建产物
+dist/
+out/
+*.tsbuildinfo
+
+# 打包产物（用 vsce package 生成，不入库）
+*.vsix
+
+# 测试
+.vscode-test/
+coverage/
+
+# 日志
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 环境变量与本地配置
+.env
+.env.*
+!.env.example
+
+# 编辑器 / 系统
+.idea/
+.DS_Store
+Thumbs.db
